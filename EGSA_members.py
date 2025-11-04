@@ -203,9 +203,21 @@ st.dataframe(final_df, use_container_width=True)
 # -------------------------------------------------------
 # 🔟 Download Updated Data
 # -------------------------------------------------------
+from io import BytesIO
+
+# -------------------------------------------------------
+# 🔟 Download Updated Data
+# -------------------------------------------------------
+st.subheader("💾 Save or Download Updated Data")
+
+buffer = BytesIO()
+final_df.to_excel(buffer, index=False, engine='openpyxl')
+buffer.seek(0)
+
 st.download_button(
     label="💾 Download Updated Excel File",
-    data=final_df.to_excel(index=False, engine='openpyxl'),
+    data=buffer,
     file_name="EGSA2025_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
