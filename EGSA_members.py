@@ -1,5 +1,5 @@
 # =======================================================
-# 🏦 EGSA 2025 Management System
+# 🏦 EGSA 2025 Management System (Cloud + Secure Version)
 # =======================================================
 import streamlit as st
 import pandas as pd
@@ -8,21 +8,39 @@ import os
 import base64
 
 # -------------------------------------------------------
-# 1️⃣ Page Setup (Centered Rotating Logo)
+# 🔐 Simple Password Gate
 # -------------------------------------------------------
 st.set_page_config(page_title="EGSA 2025 Management System", layout="wide")
 
-# --- Encode local logo as Base64 ---
-logo_path = r"C:\Users\User\Downloads\EGSA.png"
+PASSWORD = "EGSA2025!"  # ✅ change this to your own password
+
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    st.title("🔐 EGSA 2025 Login")
+    pwd = st.text_input("Enter password:", type="password")
+    if st.button("Login"):
+        if pwd == PASSWORD:
+            st.session_state.authenticated = True
+            st.success("✅ Access granted")
+            st.rerun()
+        else:
+            st.error("❌ Incorrect password")
+    st.stop()
+
+# -------------------------------------------------------
+# 1️⃣ Page Setup (Centered Rotating Logo)
+# -------------------------------------------------------
+logo_path = "EGSA.png"  # ✅ file in same repo or assets folder
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as f:
         logo_data = f.read()
         logo_base64 = base64.b64encode(logo_data).decode()
 else:
-    st.error("❌ Logo file not found! Please check the path.")
+    st.error("❌ Logo file not found! Please ensure 'EGSA.png' is in your repo.")
     st.stop()
 
-# --- Centered rotating logo ---
 st.markdown(f"""
 <div style="text-align:center;">
     <img src="data:image/png;base64,{logo_base64}" width="200" style="animation: rotate 5s linear infinite;">
@@ -41,10 +59,9 @@ st.markdown(f"""
 # -------------------------------------------------------
 # 2️⃣ Load & Clean Data
 # -------------------------------------------------------
-file_path = r"C:\Users\User\Desktop\Request\EGSA2025_info.xlsx"
-
+file_path = "EGSA2025_info.xlsx"  # ✅ Excel file in repo root
 if not os.path.exists(file_path):
-    st.error("❌ Excel file not found! Please check the path.")
+    st.error("❌ Excel file not found! Please ensure 'EGSA2025_info.xlsx' is uploaded.")
     st.stop()
 
 df = pd.read_excel(file_path)
@@ -70,10 +87,10 @@ df["total_payment"] = df["Q1_achievement"] + df["Monthly_payment_Q2"] + df["vole
 df["payment_rank"] = df["total_payment"].rank(method="dense", ascending=False).astype(int)
 
 # -------------------------------------------------------
-# 4️⃣ Display Member Data (all rows)
+# 4️⃣ Display Member Data
 # -------------------------------------------------------
 st.subheader("📋 Member Payment Overview")
-st.table(df)  # Show all rows
+st.dataframe(df, use_container_width=True)
 st.info(f"Total Members: **{df['Name'].nunique()}** | Total Rows: **{df.shape[0]}**")
 
 # -------------------------------------------------------
@@ -104,7 +121,7 @@ analysis_cols = [
     "fee_charge", "volentary_saving", "Monthly_payment_Q2",
     "total_payment", "payment_rank"
 ]
-st.table(df[analysis_cols])  # Show all rows
+st.dataframe(df[analysis_cols], use_container_width=True)
 
 # -------------------------------------------------------
 # 7️⃣ Summary Metrics
@@ -178,16 +195,17 @@ total_row = pd.DataFrame({
     "total_payment": [grand_total],
     "payment_rank": [None]
 })
-
 final_df = pd.concat([df, total_row], ignore_index=True)
 
 st.subheader("📗 Final Report with TOTAL Row")
-st.table(final_df)  # Show all rows
+st.dataframe(final_df, use_container_width=True)
 
 # -------------------------------------------------------
-# 🔟 Save Option
+# 🔟 Download Updated Data
 # -------------------------------------------------------
-if st.button("💾 Save Updated Data to Excel"):
-    save_path = r"C:\Users\User\Desktop\Request\EGSA2025_updated.xlsx"
-    final_df.to_excel(save_path, index=False)
-    st.success(f"✅ Data saved successfully to: {save_path}")
+st.download_button(
+    label="💾 Download Updated Excel File",
+    data=final_df.to_excel(index=False, engine='openpyxl'),
+    file_name="EGSA2025_updated.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
