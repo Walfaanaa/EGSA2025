@@ -85,7 +85,7 @@ for col in numeric_cols:
 # -------------------------------------------------------
 # 3️⃣ Compute Totals and Rankings (Updated SQL Logic)
 # -------------------------------------------------------
-df["total_payment"] = df["Q1_achievement"] + df["Monthly_payment_Q2"] + df["volentary_saving"] + df["fee_charge"] + df["Benefit_gain"] - df["Expenditure"]
+df["total_payment"] = df["Q1_achievement"] + df["Monthly_payment_Q2"] + df["volentary_saving"] + df["fee_charge"]
 df["payment_rank"] = df["total_payment"].rank(method="dense", ascending=False).astype(int)
 
 # -------------------------------------------------------
@@ -215,5 +215,6 @@ st.download_button(
     file_name="EGSA2025_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
 
 
