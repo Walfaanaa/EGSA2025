@@ -134,7 +134,7 @@ total_fee = df["fee_charge"].sum()
 total_voluntary = df["volentary_saving"].sum()
 total_benefit = df["Benefit_gain"].sum()       # ✅ Added
 total_expenditure = df["Expenditure"].sum()    # ✅ Added
-grand_total = df["total_payment"].sum()+df["Benefit_gain"] - df["Expenditure"]
+grand_total = df["total_payment"]+df["Benefit_gain"] - df["Expenditure"].sum()
 
 col1, col2, col3, col4, col5, col6, col7 = st.columns(7)  # ✅ add extra columns
 col1.metric("Q1 Plan", f"{total_plan:,.0f}")
@@ -215,6 +215,7 @@ st.download_button(
     file_name="EGSA2025_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
 
 
 
