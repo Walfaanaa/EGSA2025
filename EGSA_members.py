@@ -123,24 +123,27 @@ analysis_cols = ["Name", "Q1_plan", "Q1_achievement", "Difference_Q1",
 st.dataframe(df[analysis_cols], use_container_width=True)
 
 # -------------------------------------------------------
-# 7️⃣ Summary Metrics
+# 7️⃣ Summary Metrics (Updated)
 # -------------------------------------------------------
 st.subheader("📊 Summary Metrics")
+
 total_plan = df["Q1_plan"].sum()
 total_achievement = df["Q1_achievement"].sum()
 total_monthly = df["Monthly_payment_Q2"].sum()
 total_fee = df["fee_charge"].sum()
 total_voluntary = df["volentary_saving"].sum()
-total_benefit = df["Benefit_gain"].sum()
-total_expenditure = df["Expenditure"].sum()
+total_benefit = df["Benefit_gain"].sum()       # ✅ Added
+total_expenditure = df["Expenditure"].sum()    # ✅ Added
 grand_total = df["total_payment"].sum()
 
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3, col4, col5, col6, col7 = st.columns(7)  # ✅ add extra columns
 col1.metric("Q1 Plan", f"{total_plan:,.0f}")
 col2.metric("Q1 Achievement", f"{total_achievement:,.0f}", delta=int(total_achievement - total_plan))
 col3.metric("Q2 Monthly Payment", f"{total_monthly:,.0f}")
 col4.metric("Fee Charge", f"{total_fee:,.0f}")
 col5.metric("Voluntary Saving", f"{total_voluntary:,.0f}")
+col6.metric("Benefit Gain", f"{total_benefit:,.0f}")        # ✅ new metric
+col7.metric("Expenditure", f"{total_expenditure:,.0f}")      # ✅ new metric
 
 st.markdown(f"### 💰 **Grand Total Payment: {grand_total:,.2f} ETB**")
 
@@ -212,3 +215,4 @@ st.download_button(
     file_name="EGSA2025_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
