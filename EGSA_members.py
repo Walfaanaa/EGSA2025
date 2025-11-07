@@ -13,7 +13,7 @@ from io import BytesIO
 # -------------------------------------------------------
 st.set_page_config(page_title="EGSA 2025 Management System", layout="wide")
 
-PASSWORD = "EGSA2025_!"  # ✅ change this to your own password
+PASSWORD = "EGSA2025_?"  # ✅ change this to your own password
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -214,6 +214,7 @@ st.download_button(
     file_name="EGSA2025_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
 
 
 
