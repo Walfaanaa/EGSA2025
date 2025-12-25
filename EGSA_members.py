@@ -65,9 +65,9 @@ st.markdown(f"""
 # -------------------------------------------------------
 # 2️⃣ Load & Clean Data
 # -------------------------------------------------------
-file_path = "EGSA2025_info.xlsx"  # ✅ Excel file in repo root
+file_path = "EGSA2025_info_w.xlsx"  # ✅ Excel file in repo root
 if not os.path.exists(file_path):
-    st.error("❌ Excel file not found! Please ensure 'EGSA2025_info.xlsx' is uploaded.")
+    st.error("❌ Excel file not found! Please ensure 'EGSA2025_info_w.xlsx' is uploaded.")
     st.stop()
 
 df = pd.read_excel(file_path)
@@ -219,6 +219,7 @@ st.download_button(
     file_name="EGSA2025_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
 
 
 
