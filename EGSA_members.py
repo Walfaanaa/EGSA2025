@@ -7,18 +7,15 @@ import matplotlib.pyplot as plt
 import os
 import base64
 from io import BytesIO
+from dotenv import load_dotenv
 
 # -------------------------------------------------------
 # 🔐 Simple Password Gate
 # -------------------------------------------------------
 st.set_page_config(page_title="EGSA 2025 Management System", layout="wide")
 
-import os
-from dotenv import load_dotenv
-
 load_dotenv()  # Load environment variables from .env
 PASSWORD = os.getenv("EGSA_PASSWORD")  # Get password from .env
-
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -38,7 +35,7 @@ if not st.session_state.authenticated:
 # -------------------------------------------------------
 # 1️⃣ Page Setup (Centered Rotating Logo)
 # -------------------------------------------------------
-logo_path = "EGSA.png"  # ✅ file in same repo or assets folder
+logo_path = "EGSA.png"  # Logo file in repo
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as f:
         logo_data = f.read()
@@ -65,7 +62,7 @@ st.markdown(f"""
 # -------------------------------------------------------
 # 2️⃣ Load & Clean Data
 # -------------------------------------------------------
-file_path = "EGSA2025_info_w.xlsx"  # ✅ Excel file in repo root
+file_path = "EGSA2025_info_w.xlsx"
 if not os.path.exists(file_path):
     st.error("❌ Excel file not found! Please ensure 'EGSA2025_info_w.xlsx' is uploaded.")
     st.stop()
@@ -74,13 +71,14 @@ df = pd.read_excel(file_path)
 df.columns = df.columns.str.strip()
 df["Name"] = df["Name"].astype(str).str.strip()
 
-# 🧹 Remove TOTAL row(s) & duplicates
+# Remove TOTAL row(s) & duplicates
 df = df[~df["Name"].str.contains("TOTAL", case=False, na=False)]
 df = df.drop_duplicates()
 
-# 🧮 Clean numeric columns
-numeric_cols = ["Q1_plan", "Q1_achievement", "Monthly_payment_Q2", "Q2_plan", 
-                "fee_charge", "volentary_saving", "Benefit_gain", "Expenditure"]
+# Clean numeric columns
+numeric_cols = ["Q1_plan", "Q1_achievement", "Monthly_payment_Q2",
+                "Q2_plan", "Q2_achievement", "fee_charge", "volentary_saving",
+                "Benefit_gain", "Expenditure"]
 for col in numeric_cols:
     if col not in df.columns:
         df[col] = 0
@@ -88,9 +86,9 @@ for col in numeric_cols:
     df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
 # -------------------------------------------------------
-# 3️⃣ Compute Totals and Rankings (Updated SQL Logic)
+# 3️⃣ Compute Totals and Rankings
 # -------------------------------------------------------
-df["total_payment"] = df["Q1_achievement"] + df["Monthly_payment_Q2"] + df["volentary_saving"] + df["fee_charge"]
+df["total_payment"] = df["Q2_achievement"]
 df["payment_rank"] = df["total_payment"].rank(method="dense", ascending=False).astype(int)
 
 # -------------------------------------------------------
@@ -105,7 +103,6 @@ st.info(f"Total Members: **{df['Name'].nunique()}** | Total Rows: **{df.shape[0]
 # -------------------------------------------------------
 st.subheader("💵 Update Monthly Payment (Q2)")
 col1, col2 = st.columns(2)
-
 with col1:
     member_name = st.selectbox("Select Member", df["Name"])
 with col2:
@@ -113,7 +110,7 @@ with col2:
 
 if st.button("✅ Update Payment"):
     df.loc[df["Name"] == member_name, "Monthly_payment_Q2"] += added_payment
-    df["total_payment"] = df["Q1_achievement"] + df["Monthly_payment_Q2"] + df["volentary_saving"] + df["fee_charge"]
+    df["total_payment"] = df["Q2_achievement"]
     df["payment_rank"] = df["total_payment"].rank(method="dense", ascending=False).astype(int)
     st.success(f"Payment for **{member_name}** updated successfully!")
 
@@ -122,32 +119,38 @@ if st.button("✅ Update Payment"):
 # -------------------------------------------------------
 st.subheader("📈 Plan vs Achievement Analysis")
 df["Difference_Q1"] = df["Q1_achievement"] - df["Q1_plan"]
+df["Difference_Q2"] = df["Q2_achievement"] - df["Q2_plan"]
 analysis_cols = ["Name", "Q1_plan", "Q1_achievement", "Difference_Q1",
+                 "Q2_plan", "Q2_achievement", "Difference_Q2",
                  "fee_charge", "volentary_saving", "Monthly_payment_Q2",
                  "Benefit_gain", "Expenditure", "total_payment", "payment_rank"]
 st.dataframe(df[analysis_cols], use_container_width=True)
 
 # -------------------------------------------------------
-# 7️⃣ Summary Metrics (Updated)
+# 7️⃣ Summary Metrics
 # -------------------------------------------------------
 st.subheader("📊 Summary Metrics")
-
-total_plan = df["Q1_plan"].sum()
-total_achievement = df["Q1_achievement"].sum()
+total_Q1_plan = df["Q1_plan"].sum()
+total_Q1_achievement = df["Q1_achievement"].sum()
+total_Q2_plan = df["Q2_plan"].sum()
+total_Q2_achievement = df["Q2_achievement"].sum()
 total_monthly = df["Monthly_payment_Q2"].sum()
 total_fee = df["fee_charge"].sum()
 total_voluntary = df["volentary_saving"].sum()
-total_benefit = df["Benefit_gain"].sum()       # ✅ Added
-total_expenditure = df["Expenditure"].sum()    # ✅ Added
+total_benefit = df["Benefit_gain"].sum()
+total_expenditure = df["Expenditure"].sum()
 grand_total = (df["total_payment"] + df["Benefit_gain"] - df["Expenditure"]).sum()
-col1, col2, col3, col4, col5, col6, col7 = st.columns(7)  # ✅ add extra columns
-col1.metric("Q1 Plan", f"{total_plan:,.0f}")
-col2.metric("Q1 Achievement", f"{total_achievement:,.0f}", delta=int(total_achievement - total_plan))
-col3.metric("Q2 Monthly Payment", f"{total_monthly:,.0f}")
-col4.metric("Fee Charge", f"{total_fee:,.0f}")
-col5.metric("Voluntary Saving", f"{total_voluntary:,.0f}")
-col6.metric("Benefit Gain", f"{total_benefit:,.0f}")        # ✅ new metric
-col7.metric("Expenditure", f"{total_expenditure:,.0f}")      # ✅ new metric
+
+col1, col2, col3, col4, col5, col6, col7, col8, col9 = st.columns(9)
+col1.metric("Q1 Plan", f"{total_Q1_plan:,.0f}")
+col2.metric("Q1 Achievement", f"{total_Q1_achievement:,.0f}", delta=int(total_Q1_achievement - total_Q1_plan))
+col3.metric("Q2 Plan", f"{total_Q2_plan:,.0f}")
+col4.metric("Q2 Achievement", f"{total_Q2_achievement:,.0f}", delta=int(total_Q2_achievement - total_Q2_plan))
+col5.metric("Q2 Monthly Payment", f"{total_monthly:,.0f}")
+col6.metric("Fee Charge", f"{total_fee:,.0f}")
+col7.metric("Voluntary Saving", f"{total_voluntary:,.0f}")
+col8.metric("Benefit Gain", f"{total_benefit:,.0f}")
+col9.metric("Expenditure", f"{total_expenditure:,.0f}")
 
 st.markdown(f"### 💰 **Grand Total Payment: {grand_total:,.2f} ETB**")
 
@@ -156,31 +159,32 @@ st.markdown(f"### 💰 **Grand Total Payment: {grand_total:,.2f} ETB**")
 # -------------------------------------------------------
 st.subheader("📊 Visualization of Totals")
 totals = {
-    "Q1 Plan": total_plan,
-    "Achievement": total_achievement,
+    "Q1 Plan": total_Q1_plan,
+    "Q1 Achievement": total_Q1_achievement,
+    "Q2 Plan": total_Q2_plan,
+    "Q2 Achievement": total_Q2_achievement,
     "Monthly Payment Q2": total_monthly,
     "Fee Charge": total_fee,
     "Voluntary Saving": total_voluntary,
     "Benefit Gain": total_benefit,
     "Expenditure": total_expenditure,
-    "Total Payment": grand_total
+    "Grand Total": grand_total
 }
 
-# --- Bar Chart ---
-st.write("### 📊 Bar Chart")
+# Bar Chart
 fig, ax = plt.subplots(figsize=(10, 5))
-ax.bar(totals.keys(), totals.values(), color=['skyblue', 'green', 'orange', 'purple', 'red', 'pink', 'gray', 'gold'])
+ax.bar(totals.keys(), totals.values(),
+       color=['skyblue', 'green', 'orange', 'purple', 'red', 'pink', 'gray', 'gold', 'teal', 'navy'])
 ax.set_ylabel("Amount (ETB)")
 ax.set_title("EGSA 2025 Totals Overview")
 for i, v in enumerate(totals.values()):
-    ax.text(i, v + max(totals.values()) * 0.01, f"{v:,.0f}", ha='center')
+    ax.text(i, v + max(totals.values())*0.01, f"{v:,.0f}", ha='center')
 st.pyplot(fig)
 
-# --- Pie Chart ---
-st.write("### 🥧 Pie Chart")
+# Pie Chart
 fig2, ax2 = plt.subplots(figsize=(7, 7))
 ax2.pie(totals.values(), labels=totals.keys(), autopct='%1.1f%%', startangle=140,
-        colors=['skyblue', 'green', 'orange', 'purple', 'red', 'pink', 'gray', 'gold'])
+        colors=['skyblue', 'green', 'orange', 'purple', 'red', 'pink', 'gray', 'gold', 'teal', 'navy'])
 ax2.axis('equal')
 st.pyplot(fig2)
 
@@ -189,10 +193,11 @@ st.pyplot(fig2)
 # -------------------------------------------------------
 total_row = pd.DataFrame({
     "Name": ["🟩 TOTAL 🟩"],
-    "Q1_plan": [total_plan],
-    "Q1_achievement": [total_achievement],
+    "Q1_plan": [total_Q1_plan],
+    "Q1_achievement": [total_Q1_achievement],
     "Monthly_payment_Q2": [total_monthly],
-    "Q2_plan": [df["Q2_plan"].sum()],
+    "Q2_plan": [total_Q2_plan],
+    "Q2_achievement": [total_Q2_achievement],
     "fee_charge": [total_fee],
     "volentary_saving": [total_voluntary],
     "Benefit_gain": [total_benefit],
@@ -219,12 +224,3 @@ st.download_button(
     file_name="EGSA2025_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
-
-
-
-
-
-
-
-
