@@ -54,7 +54,7 @@ st.markdown(f"""
 # -------------------------------------------------------
 # 2️⃣ Load & Clean Data
 # -------------------------------------------------------
-file_path = "EGSA2025_Q2.xlsx"  # Replace with your file
+file_path = "EGSA2025_info_w.xlsx"  # Replace with your file
 if not os.path.exists(file_path):
     st.error("❌ Excel file not found! Please upload the Q2 file.")
     st.stop()
@@ -177,3 +177,4 @@ st.download_button(
     file_name="EGSA2025_Q2_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
