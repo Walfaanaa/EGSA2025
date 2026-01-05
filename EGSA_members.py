@@ -7,23 +7,67 @@ import matplotlib.pyplot as plt
 import os
 import base64
 from io import BytesIO
-
-st.set_page_config(page_title="EGSA 2025 Q2 Payment System", layout="wide")
+from dotenv import load_dotenv
 
 # -------------------------------------------------------
-# 1️⃣ Load Data
+# 🔐 Password Gate
 # -------------------------------------------------------
-# For this example, you can load your Excel or CSV file
-file_path = "EGSA2025_Q2.xlsx"  # Replace with your file
-if not os.path.exists(file_path):
-    st.error("❌ Excel/CSV file not found! Please upload the Q2 file.")
+st.set_page_config(page_title="EGSA 2025 Q2 Management System", layout="wide")
+load_dotenv()
+PASSWORD = os.getenv("EGSA_PASSWORD")
+
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    st.title("🔐 EGSA 2025 Login")
+    pwd = st.text_input("Enter password:", type="password")
+    if st.button("Login"):
+        if pwd == PASSWORD:
+            st.session_state.authenticated = True
+            st.success("✅ Access granted")
+            st.rerun()
+        else:
+            st.error("❌ Incorrect password")
     st.stop()
 
-df = pd.read_excel(file_path)  # or pd.read_csv(file_path)
+# -------------------------------------------------------
+# 1️⃣ Display Logo and Title
+# -------------------------------------------------------
+logo_path = "EGSA.png"
+if os.path.exists(logo_path):
+    with open(logo_path, "rb") as f:
+        logo_data = f.read()
+        logo_base64 = base64.b64encode(logo_data).decode()
+else:
+    st.error("❌ Logo file not found! Please ensure 'EGSA.png' is in your repo.")
+    st.stop()
+
+st.markdown(f"""
+<div style="text-align:center;">
+    <img src="data:image/png;base64,{logo_base64}" width="200">
+    <h1 style="color:#2c3e50;">EGSA 2025 Q2 Management System</h1>
+    <div style="color:gray;font-size:1.1em;">Q2 Payment and Performance Tracking</div>
+</div>
+""", unsafe_allow_html=True)
+
+# -------------------------------------------------------
+# 2️⃣ Load & Clean Data
+# -------------------------------------------------------
+file_path = "EGSA2025_Q2.xlsx"  # Replace with your file
+if not os.path.exists(file_path):
+    st.error("❌ Excel file not found! Please upload the Q2 file.")
+    st.stop()
+
+df = pd.read_excel(file_path)
 
 # Standardize column names
 df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
 df["name"] = df["name"].astype(str).str.strip()
+
+# Remove TOTAL rows and duplicates
+df = df[~df["name"].str.contains("TOTAL", case=False, na=False)]
+df = df.drop_duplicates()
 
 # Clean numeric columns
 numeric_cols = ["monthly_payment_q2", "q2_plan", "q2_achievement", "fee_charge", "benefit_gain"]
@@ -31,20 +75,20 @@ for col in numeric_cols:
     df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
 # -------------------------------------------------------
-# 2️⃣ Calculate Total Payment and Difference
+# 3️⃣ Compute Total Payment, Difference, and Rankings
 # -------------------------------------------------------
 df["total_payment"] = df["q2_achievement"] + df["monthly_payment_q2"] + df["fee_charge"] + df["benefit_gain"]
 df["difference_q2"] = df["q2_achievement"] - df["q2_plan"]
 df["payment_rank"] = df["total_payment"].rank(method="dense", ascending=False).astype(int)
 
 # -------------------------------------------------------
-# 3️⃣ Display Member Data
+# 4️⃣ Display Member Data
 # -------------------------------------------------------
 st.subheader("📋 Q2 Payment Overview")
 st.dataframe(df, use_container_width=True)
 
 # -------------------------------------------------------
-# 4️⃣ Update Monthly Payment
+# 5️⃣ Update Monthly Payment
 # -------------------------------------------------------
 st.subheader("💵 Update Monthly Payment (Q2)")
 col1, col2 = st.columns(2)
@@ -60,7 +104,7 @@ if st.button("✅ Update Payment"):
     st.success(f"Payment for **{member_name}** updated successfully!")
 
 # -------------------------------------------------------
-# 5️⃣ Summary Metrics
+# 6️⃣ Summary Metrics
 # -------------------------------------------------------
 st.subheader("📊 Summary Metrics")
 Q2_plan = df["q2_plan"].sum()
@@ -79,7 +123,7 @@ cols[4].metric("Benefit Gain", f"{T_benefit:,.0f}")
 cols[5].metric("Grand Total Payment", f"{G_total:,.0f}")
 
 # -------------------------------------------------------
-# 6️⃣ Visualization
+# 7️⃣ Visualization
 # -------------------------------------------------------
 st.subheader("📊 Visualization of Totals")
 totals = {
@@ -91,7 +135,6 @@ totals = {
     "Grand Total": G_total
 }
 
-# Bar Chart
 fig, ax = plt.subplots(figsize=(10, 5))
 ax.bar(totals.keys(), totals.values(), color=['orange', 'purple', 'red', 'pink', 'gold', 'teal'])
 ax.set_ylabel("Amount (ETB)")
@@ -108,7 +151,7 @@ ax2.axis('equal')
 st.pyplot(fig2)
 
 # -------------------------------------------------------
-# 7️⃣ Add TOTAL Row & Download
+# 8️⃣ Add TOTAL Row & Download
 # -------------------------------------------------------
 total_row = pd.DataFrame({
     "name": ["🟩 TOTAL 🟩"],
