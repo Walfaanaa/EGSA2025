@@ -82,8 +82,7 @@ for col in numeric_cols:
         df[col] = 0  # create missing numeric columns
 
 # ---------------- COMPUTE METRICS ----------------
-df["total_payment"] = df.get("q2_achievement", 0) + df.get("monthly_payment_q2", 0) \
-                      + df.get("fee_charge", 0) + df.get("benefit_gain", 0)
+df["total_payment"] = df.get("q2_achievement", 0) + df.get("fee_charge", 0) + df.get("benefit_gain", 0)
 df["difference_q2"] = df.get("q2_achievement", 0) - df.get("q2_plan", 0)
 df["payment_rank"] = df["total_payment"].rank(method="dense", ascending=False).astype(int)
 
@@ -172,4 +171,5 @@ st.download_button(
     file_name="EGSA2025_Q2_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
 
