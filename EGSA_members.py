@@ -68,26 +68,26 @@ if not os.path.exists(file_path):
 
 df = pd.read_excel(file_path)
 
-# Standardize column names: remove spaces, strip, lowercase
+# Standardize column names
 df.columns = df.columns.str.strip().str.replace(" ", "_").str.lower()
 df["name"] = df["name"].astype(str).str.strip()
 
-# Remove TOTAL row(s) & duplicates
+# Remove TOTAL rows and duplicates
 df = df[~df["name"].str.contains("TOTAL", case=False, na=False)]
 df = df.drop_duplicates()
 
-# Numeric columns to clean
+# Define numeric columns
 numeric_cols = ["q1_plan", "q1_achievement", "monthly_payment_q2",
                 "q2_plan", "q2_achievement", "fee_charge", "voluntary_saving",
                 "benefit_gain", "expenditure"]
 
+# Clean numeric columns safely
 for col in numeric_cols:
-    if col not in df.columns:
-        df[col] = 0
-    else:
-        # Remove any non-numeric characters and convert
-        df[col] = df[col].astype(str).str.replace(r"[^\d.]", "", regex=True)
+    if col in df.columns:
+        # Convert to numeric, keep actual numbers, fill blanks with 0
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+    else:
+        df[col] = 0
 
 # -------------------------------------------------------
 # 3️⃣ Compute Totals and Rankings
@@ -113,7 +113,6 @@ with col2:
     added_payment = st.number_input("Enter Payment Amount to Add (ETB)", min_value=0, step=100)
 
 if st.button("✅ Update Payment"):
-    df["monthly_payment_q2"] = pd.to_numeric(df["monthly_payment_q2"], errors="coerce").fillna(0)
     df.loc[df["name"] == member_name, "monthly_payment_q2"] += added_payment
     df["total_payment"] = df["q2_achievement"] + df["monthly_payment_q2"] + df["benefit_gain"] + df["fee_charge"] - df["expenditure"]
     df["payment_rank"] = df["total_payment"].rank(method="dense", ascending=False).astype(int)
