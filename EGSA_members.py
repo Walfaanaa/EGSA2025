@@ -141,45 +141,45 @@ st.dataframe(df[analysis_cols], use_container_width=True)
 # 7️⃣ Summary Metrics
 # -------------------------------------------------------
 st.subheader("📊 Summary Metrics")
-total_Q1_plan = df["Q1_plan"].sum()
-total_Q1_achievement = df["Q1_achievement"].sum()
-total_Q2_plan = df["Q2_plan"].sum()
-total_Q2_achievement = df["Q2_achievement"].sum()
-total_monthly = df["Monthly_payment_Q2"].sum()
-total_fee = df["fee_charge"].sum()
-total_voluntary = df["volentary_saving"].sum()
-total_benefit = df["Benefit_gain"].sum()
-total_expenditure = df["Expenditure"].sum()
-grand_total = (df["Q2_achievement"] + df["Benefit_gain"] + df["fee_charge"] + df["Monthly_payment_Q2"] - df["Expenditure"]).sum()
+Q1_plan = df["Q1_plan"].sum()
+Q1_achievement = df["Q1_achievement"].sum()
+Q2_plan = df["Q2_plan"].sum()
+Q2_achievement = df["Q2_achievement"].sum()
+T_monthly = df["Monthly_payment_Q2"].sum()
+T_fee = df["fee_charge"].sum()
+T_voluntary = df["volentary_saving"].sum()
+T_benefit = df["Benefit_gain"].sum()
+T_expenditure = df["Expenditure"].sum()
+G_total = (df["Q2_achievement"] + df["Benefit_gain"] + df["fee_charge"] + df["Monthly_payment_Q2"] - df["Expenditure"]).sum()
 
 cols = st.columns(9)
-cols[0].metric("Q1 Plan", f"{total_Q1_plan:,.0f}")
-cols[1].metric("Q1 Achievement", f"{total_Q1_achievement:,.0f}", delta=int(total_Q1_achievement - total_Q1_plan))
-cols[2].metric("Q2 Plan", f"{total_Q2_plan:,.0f}")
-cols[3].metric("Q2 Achievement", f"{total_Q2_achievement:,.0f}", delta=int(total_Q2_achievement - total_Q2_plan))
-cols[4].metric("Q2 Monthly Payment", f"{total_monthly:,.0f}")
-cols[5].metric("Fee Charge", f"{total_fee:,.0f}")
-cols[6].metric("Voluntary Saving", f"{total_voluntary:,.0f}")
-cols[7].metric("Benefit Gain", f"{total_benefit:,.0f}")
-cols[8].metric("Expenditure", f"{total_expenditure:,.0f}")
+cols[0].metric("Q1 Plan", f"{Q1_plan:,.0f}")
+cols[1].metric("Q1 Achievement", f"{Q1_achievement:,.0f}", delta=int(Q1_achievement - Q1 Plan))
+cols[2].metric("Q2 Plan", f"{Q2_plan:,.0f}")
+cols[3].metric("Q2 Achievement", f"{Q2_achievement:,.0f}", delta=int(Q2_achievement - Q2_plan))
+cols[4].metric("Q2 Monthly Payment", f"{T_monthly:,.0f}")
+cols[5].metric("Fee Charge", f"{T_fee:,.0f}")
+cols[6].metric("Voluntary Saving", f"{T_voluntary:,.0f}")
+cols[7].metric("Benefit Gain", f"{T_benefit:,.0f}")
+cols[8].metric("Expenditure", f"{T_expenditure:,.0f}")
 
-st.markdown(f"### 💰 **Grand Total Payment: {grand_total:,.2f} ETB**")
+st.markdown(f"### 💰 **Grand Total Payment: {G_total:,.2f} ETB**")
 
 # -------------------------------------------------------
 # 8️⃣ Visualization of Totals
 # -------------------------------------------------------
 st.subheader("📊 Visualization of Totals")
 totals = {
-    "Q1 Plan": total_Q1_plan,
-    "Q1 Achievement": total_Q1_achievement,
-    "Q2 Plan": total_Q2_plan,
-    "Q2 Achievement": total_Q2_achievement,
-    "Monthly Payment Q2": total_monthly,
-    "Fee Charge": total_fee,
-    "Voluntary Saving": total_voluntary,
-    "Benefit Gain": total_benefit,
-    "Expenditure": total_expenditure,
-    "Grand Total": grand_total
+    "Q1 Plan": Q1_plan,
+    "Q1 Achievement": Q1_achievement,
+    "Q2 Plan": Q2_plan,
+    "Q2 Achievement": Q2_achievement,
+    "Monthly Payment Q2": T_monthly,
+    "Fee Charge": T_fee,
+    "Voluntary Saving": T_voluntary,
+    "Benefit Gain": T_benefit,
+    "Expenditure": T_expenditure,
+    "Grand Total": G_total
 }
 
 # Bar Chart
@@ -204,19 +204,19 @@ st.pyplot(fig2)
 # -------------------------------------------------------
 total_row = pd.DataFrame({
     "Name": ["🟩 TOTAL 🟩"],
-    "Q1_plan": [total_Q1_plan],
-    "Q1_achievement": [total_Q1_achievement],
-    "Monthly_payment_Q2": [total_monthly],
-    "Q2_plan": [total_Q2_plan],
-    "Q2_achievement": [total_Q2_achievement],
-    "fee_charge": [total_fee],
-    "volentary_saving": [total_voluntary],
-    "Benefit_gain": [total_benefit],
-    "Expenditure": [total_expenditure],
-    "total_payment": [grand_total],
+    "Q1_plan": [Q1_plan],
+    "Q1_achievement": [Q1_achievement],
+    "Monthly_payment_Q2": [T_monthly],
+    "Q2_plan": [Q2_plan],
+    "Q2_achievement": [Q2_achievement],
+    "fee_charge": [T_fee],
+    "volentary_saving": [T_voluntary],
+    "Benefit_gain": [T_benefit],
+    "Expenditure": [T_expenditure],
+    "total_payment": [G_total],
     "payment_rank": [None],
-    "Difference_Q1": [total_Q1_achievement - total_Q1_plan],
-    "Difference_Q2": [total_Q2_achievement - total_Q2_plan]
+    "Difference_Q1": [Q1_achievement - Q1_plan],
+    "Difference_Q2": [Q2_achievement - Q2_plan]
 })
 final_df = pd.concat([df, total_row], ignore_index=True)
 
@@ -237,3 +237,4 @@ st.download_button(
     file_name="EGSA2025_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
