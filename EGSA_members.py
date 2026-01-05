@@ -75,20 +75,23 @@ df["Name"] = df["Name"].astype(str).str.strip()
 df = df[~df["Name"].str.contains("TOTAL", case=False, na=False)]
 df = df.drop_duplicates()
 
-# Clean numeric columns
+# Clean numeric columns robustly
 numeric_cols = ["Q1_plan", "Q1_achievement", "Monthly_payment_Q2",
                 "Q2_plan", "Q2_achievement", "fee_charge", "volentary_saving",
                 "Benefit_gain", "Expenditure"]
+
 for col in numeric_cols:
     if col not in df.columns:
         df[col] = 0
-    df[col] = df[col].astype(str).str.replace(",", "").str.strip()
-    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+    else:
+        # Remove commas, spaces, non-breaking spaces, convert to numeric
+        df[col] = df[col].astype(str).str.replace(",", "").str.replace("\xa0", "").str.strip()
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
 # -------------------------------------------------------
 # 3️⃣ Compute Totals and Rankings
 # -------------------------------------------------------
-df["total_payment"] = df["Q2_achievement"]
+df["total_payment"] = df["Q2_achievement"] + df["Monthly_payment_Q2"] + df["Benefit_gain"] + df["fee_charge"] - df["Expenditure"]
 df["payment_rank"] = df["total_payment"].rank(method="dense", ascending=False).astype(int)
 
 # -------------------------------------------------------
@@ -109,9 +112,16 @@ with col2:
     added_payment = st.number_input("Enter Payment Amount to Add (ETB)", min_value=0, step=100)
 
 if st.button("✅ Update Payment"):
+    # Ensure column is numeric
+    df["Monthly_payment_Q2"] = pd.to_numeric(df["Monthly_payment_Q2"], errors="coerce").fillna(0)
+    
+    # Update selected member
     df.loc[df["Name"] == member_name, "Monthly_payment_Q2"] += added_payment
-    df["total_payment"] = df["Q2_achievement"]
+    
+    # Recompute total payment & rank
+    df["total_payment"] = df["Q2_achievement"] + df["Monthly_payment_Q2"] + df["Benefit_gain"] + df["fee_charge"] - df["Expenditure"]
     df["payment_rank"] = df["total_payment"].rank(method="dense", ascending=False).astype(int)
+    
     st.success(f"Payment for **{member_name}** updated successfully!")
 
 # -------------------------------------------------------
@@ -120,6 +130,7 @@ if st.button("✅ Update Payment"):
 st.subheader("📈 Plan vs Achievement Analysis")
 df["Difference_Q1"] = df["Q1_achievement"] - df["Q1_plan"]
 df["Difference_Q2"] = df["Q2_achievement"] - df["Q2_plan"]
+
 analysis_cols = ["Name", "Q1_plan", "Q1_achievement", "Difference_Q1",
                  "Q2_plan", "Q2_achievement", "Difference_Q2",
                  "fee_charge", "volentary_saving", "Monthly_payment_Q2",
@@ -139,18 +150,18 @@ total_fee = df["fee_charge"].sum()
 total_voluntary = df["volentary_saving"].sum()
 total_benefit = df["Benefit_gain"].sum()
 total_expenditure = df["Expenditure"].sum()
-grand_total = (df["Q2_achievement"] + df["Benefit_gain"] +df["fee_charge"]- df["Expenditure"]).sum()
+grand_total = (df["Q2_achievement"] + df["Benefit_gain"] + df["fee_charge"] + df["Monthly_payment_Q2"] - df["Expenditure"]).sum()
 
-col1, col2, col3, col4, col5, col6, col7, col8, col9 = st.columns(9)
-col1.metric("Q1 Plan", f"{total_Q1_plan:,.0f}")
-col2.metric("Q1 Achievement", f"{total_Q1_achievement:,.0f}", delta=int(total_Q1_achievement - total_Q1_plan))
-col3.metric("Q2 Plan", f"{total_Q2_plan:,.0f}")
-col4.metric("Q2 Achievement", f"{total_Q2_achievement:,.0f}", delta=int(total_Q2_achievement - total_Q2_plan))
-col5.metric("Q2 Monthly Payment", f"{total_monthly:,.0f}")
-col6.metric("Fee Charge", f"{total_fee:,.0f}")
-col7.metric("Voluntary Saving", f"{total_voluntary:,.0f}")
-col8.metric("Benefit Gain", f"{total_benefit:,.0f}")
-col9.metric("Expenditure", f"{total_expenditure:,.0f}")
+cols = st.columns(9)
+cols[0].metric("Q1 Plan", f"{total_Q1_plan:,.0f}")
+cols[1].metric("Q1 Achievement", f"{total_Q1_achievement:,.0f}", delta=int(total_Q1_achievement - total_Q1_plan))
+cols[2].metric("Q2 Plan", f"{total_Q2_plan:,.0f}")
+cols[3].metric("Q2 Achievement", f"{total_Q2_achievement:,.0f}", delta=int(total_Q2_achievement - total_Q2_plan))
+cols[4].metric("Q2 Monthly Payment", f"{total_monthly:,.0f}")
+cols[5].metric("Fee Charge", f"{total_fee:,.0f}")
+cols[6].metric("Voluntary Saving", f"{total_voluntary:,.0f}")
+cols[7].metric("Benefit Gain", f"{total_benefit:,.0f}")
+cols[8].metric("Expenditure", f"{total_expenditure:,.0f}")
 
 st.markdown(f"### 💰 **Grand Total Payment: {grand_total:,.2f} ETB**")
 
@@ -203,7 +214,9 @@ total_row = pd.DataFrame({
     "Benefit_gain": [total_benefit],
     "Expenditure": [total_expenditure],
     "total_payment": [grand_total],
-    "payment_rank": [None]
+    "payment_rank": [None],
+    "Difference_Q1": [total_Q1_achievement - total_Q1_plan],
+    "Difference_Q2": [total_Q2_achievement - total_Q2_plan]
 })
 final_df = pd.concat([df, total_row], ignore_index=True)
 
@@ -224,5 +237,3 @@ st.download_button(
     file_name="EGSA2025_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
-
