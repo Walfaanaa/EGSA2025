@@ -101,8 +101,7 @@ with col2:
 
 if st.button("✅ Update Payment"):
     df.loc[df["name"] == member_name, "monthly_payment_q2"] += added_payment
-    df["total_payment"] = df.get("q2_achievement", 0) + df.get("monthly_payment_q2", 0) \
-                          + df.get("fee_charge", 0) + df.get("benefit_gain", 0)
+    df["total_payment"] = df.get("q2_achievement", 0) + df.get("fee_charge", 0) + df.get("benefit_gain", 0)
     df["payment_rank"] = df["total_payment"].rank(method="dense", ascending=False).astype(int)
     st.success(f"Payment for **{member_name}** updated successfully!")
 
@@ -173,3 +172,4 @@ st.download_button(
     file_name="EGSA2025_Q2_updated.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
