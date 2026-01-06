@@ -1,5 +1,5 @@
 # =======================================================
-# 🏦 EGSA 2025 Management System – Q2 (NET CAPITAL VERSION)
+# 🏦 EGSA 2025 Management System  (NET CAPITAL VERSION)
 # =======================================================
 
 import streamlit as st
@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 # ---------------- CONFIG ----------------
 st.set_page_config(
-    page_title="EGSA 2025 Q2 Management System",
+    page_title="EGSA 2025 Cash Flow Management System",
     layout="wide"
 )
 
@@ -224,3 +224,4 @@ st.download_button(
     file_name="EGSA2025_Q2_NET_Report.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
