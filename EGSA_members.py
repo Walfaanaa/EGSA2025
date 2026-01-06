@@ -176,13 +176,6 @@ bar_totals = {
     "Net Capital": G_total
 }
 
-fig, ax = plt.subplots(figsize=(10, 5))
-ax.bar(bar_totals.keys(), bar_totals.values())
-ax.set_ylabel("Amount (ETB)")
-ax.set_title("EGSA 2025 Q2 – Net Financial Overview")
-
-fig, ax = plt.subplots(figsize=(10, 5))
-
 colors = [
     "#2ecc71",  # Q2 Achievement (green)
     "#3498db",  # Fee Charge (blue)
@@ -190,6 +183,8 @@ colors = [
     "#e74c3c",  # Expenditure (red - outflow)
     "#f1c40f"   # Net Capital (gold)
 ]
+
+fig, ax = plt.subplots(figsize=(10, 5))
 
 ax.bar(
     bar_totals.keys(),
@@ -200,6 +195,17 @@ ax.bar(
 ax.set_ylabel("Amount (ETB)")
 ax.set_title("EGSA 2025 Q2 – Net Financial Overview")
 
+# value labels
+for i, v in enumerate(bar_totals.values()):
+    ax.text(
+        i,
+        v + (abs(v) * 0.03),
+        f"{v:,.0f}",
+        ha="center",
+        fontweight="bold"
+    )
+
+st.pyplot(fig)   # ✅ THIS WAS MISSING
 
 # ---------------- PIE CHART (NO NEGATIVES) ----------------
 st.subheader("📊 Financial Composition (Positive Values Only)")
@@ -252,4 +258,5 @@ st.download_button(
     file_name="EGSA2025_Q2_NET_Report.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
 
