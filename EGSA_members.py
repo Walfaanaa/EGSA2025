@@ -1,5 +1,5 @@
 # =======================================================
-# 🏦 EGSA 2025 Management System  (NET CAPITAL VERSION)
+# 🏦 EGSA 2025 Management System  (NET CAPITAL – FIXED)
 # =======================================================
 
 import streamlit as st
@@ -154,20 +154,22 @@ G_total = (
 
 cols = st.columns(7)
 cols[0].metric("Q2 Plan", f"{Q2_plan:,.0f}")
-cols[1].metric("Q2 Achievement", f"{Q2_achievement:,.0f}", delta=int(Q2_achievement - Q2_plan))
+cols[1].metric(
+    "Q2 Achievement",
+    f"{Q2_achievement:,.0f}",
+    delta=int(Q2_achievement - Q2_plan)
+)
 cols[2].metric("Monthly Payment Q2", f"{T_monthly:,.0f}")
 cols[3].metric("Fee Charge", f"{T_fee:,.0f}")
 cols[4].metric("Benefit Gain", f"{T_benefit:,.0f}")
 cols[5].metric("Expenditure", f"-{T_expenditure:,.0f}")
 cols[6].metric("Net Grand Total", f"{G_total:,.0f}")
 
-# ---------------- VISUALIZATION ----------------
-st.subheader("📊 Financial Overview")
+# ---------------- BAR CHART (NEGATIVES OK) ----------------
+st.subheader("📊 Financial Overview – Inflow vs Outflow")
 
-totals = {
-    "Q2 Plan": Q2_plan,
+bar_totals = {
     "Q2 Achievement": Q2_achievement,
-    "Monthly Payment": T_monthly,
     "Fee Charge": T_fee,
     "Benefit Gain": T_benefit,
     "Expenditure": -T_expenditure,
@@ -175,22 +177,33 @@ totals = {
 }
 
 fig, ax = plt.subplots(figsize=(10, 5))
-ax.bar(totals.keys(), totals.values())
+ax.bar(bar_totals.keys(), bar_totals.values())
 ax.set_ylabel("Amount (ETB)")
 ax.set_title("EGSA 2025 Q2 – Net Financial Overview")
 
-for i, v in enumerate(totals.values()):
-    ax.text(i, v + max(totals.values()) * 0.01, f"{v:,.0f}", ha="center")
+for i, v in enumerate(bar_totals.values()):
+    ax.text(i, v + abs(v) * 0.02, f"{v:,.0f}", ha="center")
 
 st.pyplot(fig)
 
+# ---------------- PIE CHART (NO NEGATIVES) ----------------
+st.subheader("📊 Financial Composition (Positive Values Only)")
+
+pie_totals = {
+    "Q2 Achievement": Q2_achievement,
+    "Fee Charge": T_fee,
+    "Benefit Gain": T_benefit,
+    "Expenditure": T_expenditure
+}
+
 fig2, ax2 = plt.subplots(figsize=(7, 7))
 ax2.pie(
-    totals.values(),
-    labels=totals.keys(),
+    pie_totals.values(),
+    labels=pie_totals.keys(),
     autopct="%1.1f%%",
     startangle=140
 )
+ax2.set_title("EGSA 2025 Q2 – Financial Composition")
 ax2.axis("equal")
 st.pyplot(fig2)
 
@@ -224,4 +237,3 @@ st.download_button(
     file_name="EGSA2025_Q2_NET_Report.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
