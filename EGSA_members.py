@@ -108,7 +108,7 @@ df["total_payment"] = (
 )
 
 df["difference_q2"] = df["q2_achievement"] - df["q2_plan"]
-df["payment_rank"] = df["total_payment"].rank(
+df["payment_rank"] = df["q2_achievement"].rank(
     method="dense",
     ascending=False
 ).astype(int)
@@ -258,5 +258,6 @@ st.download_button(
     file_name="EGSA2025_Q2_NET_Report.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
 
 
