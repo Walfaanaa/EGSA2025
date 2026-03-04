@@ -51,7 +51,7 @@ if os.path.exists(logo_path):
         unsafe_allow_html=True
     )
 else:
-    st.title("EGSA 2025 Q2 Management System")
+    st.title("EGSA 2025 Q3 Management System")
     st.caption("Net Capital & Performance Tracking")
 
 # ---------------- LOAD DATA ----------------
@@ -258,6 +258,7 @@ st.download_button(
     file_name="EGSA2025_Q2_NET_Report.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
 
 
 
