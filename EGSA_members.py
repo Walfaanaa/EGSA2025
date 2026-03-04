@@ -114,11 +114,11 @@ df["payment_rank"] = df["q2_achievement"].rank(
 ).astype(int)
 
 # ---------------- DISPLAY DATA ----------------
-st.subheader("📋 Q2 Member Performance (Net Capital)")
+st.subheader("📋 Q3 Member Performance (Net Capital)")
 st.dataframe(df, use_container_width=True)
 
 # ---------------- UPDATE MONTHLY PAYMENT ----------------
-st.subheader("💵 Update Monthly Payment (Q2)")
+st.subheader("💵 Update Monthly Payment (Q3)")
 c1, c2 = st.columns(2)
 
 with c1:
@@ -258,6 +258,7 @@ st.download_button(
     file_name="EGSA2025_Q2_NET_Report.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
 
 
 
