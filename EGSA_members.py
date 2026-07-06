@@ -44,14 +44,14 @@ if os.path.exists(logo_path):
         f"""
         <div style="text-align:center;">
             <img src="data:image/png;base64,{logo_base64}" width="200">
-            <h1 style="color:#2c3e50;">EGSA 2025 Q2 Management System</h1>
+            <h1 style="color:#2c3e50;">EGSA 2025  Management System</h1>
             <div style="color:gray;">Net Capital & Performance Tracking</div>
         </div>
         """,
         unsafe_allow_html=True
     )
 else:
-    st.title("EGSA 2025 Q3 Management System")
+    st.title("EGSA 2025  Management System")
     st.caption("Net Capital & Performance Tracking")
 
 # ---------------- LOAD DATA ----------------
@@ -61,8 +61,8 @@ df = None
 if os.path.exists(file_path):
     df = pd.read_excel(file_path)
 else:
-    uploaded = st.file_uploader("📤 Upload Q2 Excel File", type=["xlsx", "xls"])
-    if uploaded:
+    uploaded = st.file_uploader("📤 Upload  Excel File", type=["xlsx", "xls"])
+    if uploaded
         df = pd.read_excel(uploaded)
 
 if df is None:
@@ -114,7 +114,7 @@ df["payment_rank"] = df["q2_achievement"].rank(
 ).astype(int)
 
 # ---------------- DISPLAY DATA ----------------
-st.subheader("📋 Q3 Member Performance (Net Capital)")
+st.subheader("📋 EGSA2025 Members Performance (Net Capital)")
 st.dataframe(df, use_container_width=True)
 
 # ---------------- UPDATE MONTHLY PAYMENT ----------------
@@ -132,7 +132,7 @@ with c2:
     )
 
 if st.button("✅ Update Payment"):
-    df.loc[df["name"] == member_name, "monthly_payment_q2"] += added_payment
+    df.loc[df["name"] == member_name, "monthly_payment"] += added_payment
     st.success(f"Payment updated for **{member_name}**")
 
 # ---------------- SUMMARY METRICS ----------------
@@ -159,7 +159,7 @@ cols[1].metric(
     f"{Q2_achievement:,.0f}",
     delta=int(Q2_achievement - Q2_plan)
 )
-cols[2].metric("Monthly Payment Q2", f"{T_monthly:,.0f}")
+cols[2].metric("Monthly Payment ", f"{T_monthly:,.0f}")
 cols[3].metric("Fee Charge", f"{T_fee:,.0f}")
 cols[4].metric("Benefit Gain", f"{T_benefit:,.0f}")
 cols[5].metric("Expenditure", f"-{T_expenditure:,.0f}")
@@ -193,7 +193,7 @@ ax.bar(
 )
 
 ax.set_ylabel("Amount (ETB)")
-ax.set_title("EGSA 2025 Q2 – Net Financial Overview")
+ax.set_title("EGSA 2025  – Net Financial Overview")
 
 # value labels
 for i, v in enumerate(bar_totals.values()):
@@ -224,7 +224,7 @@ ax2.pie(
     autopct="%1.1f%%",
     startangle=140
 )
-ax2.set_title("EGSA 2025 Q2 – Financial Composition")
+ax2.set_title("EGSA 2025  – Financial Composition")
 ax2.axis("equal")
 st.pyplot(fig2)
 
@@ -244,7 +244,7 @@ total_row = pd.DataFrame({
 
 final_df = pd.concat([df, total_row], ignore_index=True)
 
-st.subheader("📗 Final Q2 Report (Net Capital)")
+st.subheader("📗 Final  Report (Net Capital)")
 st.dataframe(final_df, use_container_width=True)
 
 # ---------------- DOWNLOAD ----------------
