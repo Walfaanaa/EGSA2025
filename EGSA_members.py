@@ -56,19 +56,26 @@ else:
 
 # ---------------- LOAD DATA ----------------
 file_path = "EGSA2025_info_w.xlsx"
-df = None
 
-if os.path.exists(file_path):
-    df = pd.read_excel(file_path)
-else:
-    uploaded = st.file_uploader("📤 Upload  Excel File", type=["xlsx", "xls"])
-    if uploaded
-        df = pd.read_excel(uploaded)
+if "df" not in st.session_state:
 
-if df is None:
-    st.warning("❌ No Excel file loaded.")
-    st.stop()
+    if os.path.exists(file_path):
+        st.session_state.df = pd.read_excel(file_path)
 
+    else:
+        uploaded = st.file_uploader(
+            "📤 Upload Excel File",
+            type=["xlsx", "xls"]
+        )
+
+        if uploaded is not None:
+            st.session_state.df = pd.read_excel(uploaded)
+
+        else:
+            st.warning("❌ No Excel file loaded.")
+            st.stop()
+
+df = st.session_state.df
 # ---------------- CLEAN DATA ----------------
 df.columns = (
     df.columns.str.strip()
